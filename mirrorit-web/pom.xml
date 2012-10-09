@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>mirrorit</groupId>
+	<artifactId>mirrorit-web</artifactId>
+	<packaging>war</packaging>
+	<name>mirrorit-web</name>
+	<version>1.0.0-SNAPSHOT</version>
+
+	<parent>
+		<groupId>mirrorit</groupId>
+		<artifactId>mirrorit-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../mirrorit-parent</relativePath>
+	</parent>
+
+	<dependencies>
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>servlet-api</artifactId>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>commons-fileupload</groupId>
+				<artifactId>commons-fileupload</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>com.googlecode.mycontainer</groupId>
+				<artifactId>mycontainer-web</artifactId>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.googlecode.mycontainer</groupId>
+				<artifactId>mycontainer-servlet-commons</artifactId>
+			</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.googlecode.mycontainer</groupId>
+				<artifactId>maven-mycontainer-plugin</artifactId>
+				<version>${mycontainer.version}</version>
+				<configuration>
+					<script>src/test/resources/mycontainer-start.bsh</script>
+					<includeTests>true</includeTests>
+				</configuration>
+				<dependencies>
+				</dependencies>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
