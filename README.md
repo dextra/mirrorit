@@ -1,7 +1,6 @@
-
 ```bash
 # starting
-java -cp mirrotit.jar config.beanshell
+java -jar mirrotit.jar config.beanshell
 ```
 
 config.beanshell
