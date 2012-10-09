@@ -5,13 +5,12 @@ import org.junit.Before;
 
 import com.googlecode.mycontainer.commons.http.HttpClientRequestService;
 import com.googlecode.mycontainer.commons.http.RequestAdapter;
-import com.googlecode.mycontainer.commons.http.RequestService;
 
 public class AbstractTestCase {
 
 	protected TestHelper helper;
 
-	protected RequestService s;
+	protected HttpClientRequestService s;
 
 	protected RequestAdapter a;
 
@@ -20,7 +19,7 @@ public class AbstractTestCase {
 		helper = new TestHelper();
 		helper.bootMycontainer();
 
-		s = new HttpClientRequestService("http://localhost:8580");
+		s = new HttpClientRequestService("http://localhost:" + helper.getPort());
 		a = new RequestAdapter(s);
 	}
 
