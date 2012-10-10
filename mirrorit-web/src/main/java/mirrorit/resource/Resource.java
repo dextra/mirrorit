@@ -1,10 +1,12 @@
 package mirrorit.resource;
 
-import java.io.InputStream;
+import java.io.Closeable;
+
+import javax.servlet.ServletOutputStream;
 
 import com.googlecode.mycontainer.commons.file.ContentTypeUtil;
 
-public abstract class Resource {
+public abstract class Resource implements Closeable {
 
 	private String host;
 	private Integer port;
@@ -45,6 +47,8 @@ public abstract class Resource {
 
 	public abstract String getLength();
 
-	public abstract InputStream openStream();
+	public void writeTo(ServletOutputStream outputStream) {
+		
+	}
 
 }

@@ -1,7 +1,6 @@
 package mirrorit.servlet;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -12,18 +11,16 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import mirrorit.MirroritHttpCodeException;
 import mirrorit.resource.Resource;
-import mirrorit.resource.ResourceFactory;
+import mirrorit.resource.ResourceFS;
 
 import com.googlecode.mycontainer.commons.io.IOUtil;
 
 public class ProxyFilter implements Filter {
 
-	private ResourceFactory rf;
-
 	@Override
 	public void init(FilterConfig cfg) throws ServletException {
-		rf = new ResourceFactory();
 	}
 
 	@Override
@@ -38,27 +35,43 @@ public class ProxyFilter implements Filter {
 			return;
 		}
 
-		Resource resource = rf.get(url);
-		String mediaType = resource.getMediaType();
-		String encode = resource.getEncode();
-		String length = resource.getLength();
+		Resource resource = ResourceFS.instance().get(url);
+		try {
+			String mediaType = resource.getMediaType();
+			String encode = resource.getEncode();
+			String length = resource.getLength();
 
-		if (mediaType == null || length == null) {
-			throw new RuntimeException("mediaType and length is required: " + url);
+			if (mediaType == null) {
+				throw new RuntimeException("mediaType is required: " + url);
+			}
+
+			resp.setContentType(mediaType);
+			if (encode != null) {
+				resp.setCharacterEncoding(encode);
+			}
+			if (length != null) {
+				resp.setHeader("Content-Length", length);
+			}
+
+			resource.writeTo(resp.getOutputStream());
+		} finally {
+			IOUtil.close(resource);
 		}
-
-		resp.setContentType(mediaType);
-		if (encode != null) {
-			resp.setCharacterEncoding(encode);
-		}
-		resp.setHeader("Content-Length", length);
-
-		InputStream in = resource.openStream();
-		IOUtil.copyAll(in, resp.getOutputStream());
 	}
 
 	private String getTargetUrl(HttpServletRequest req) {
 		String ret = req.getRequestURL().toString();
+		if (!req.getMethod().toUpperCase().equals("GET")) {
+			throw new MirroritHttpCodeException(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		}
+		String query = req.getQueryString();
+		if (query == null) {
+			query = "";
+		}
+		if (query.trim().length() > 0) {
+			throw new RuntimeException("we will not proxy/cache url with query string: " + ret + "?" + query);
+		}
+		System.out.println("query: " + query);
 		if (ret.startsWith("http://localhost") || ret.startsWith("http://127.0.0.1")) {
 			return null;
 		}
