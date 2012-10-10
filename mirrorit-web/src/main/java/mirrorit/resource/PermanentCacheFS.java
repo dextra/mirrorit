@@ -16,13 +16,14 @@ public class PermanentCacheFS {
 		return ME;
 	}
 
-	public Future<Resource> get(String url) {
-		Download download = queue(url);
+	public synchronized Future<Resource> get(String url) {
+		Resource resource = Repository.instance().find(url);
+		if(resource != null) {
+			return new CachedResource(resource);
+		}
+		
+		Download download = queue.add(url);
 		return download;
-	}
-
-	private Download queue(String url) {
-		return queue.add(url);
 	}
 
 	public void startDownloads() {

@@ -3,7 +3,6 @@ package mirrorit.resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -46,7 +45,7 @@ public class Downloader implements Runnable {
 			HttpGet req = download.getRequest();
 			HttpClient client = getClient();
 			FileOutputStream out = null;
-			File tmp = createTempFile(req.getURI());
+			File tmp = Repository.instance().createTempFile(req.getURI());
 			try {
 				out = new FileOutputStream(tmp);
 				HttpResponse resp = client.execute(req);
@@ -62,16 +61,6 @@ public class Downloader implements Runnable {
 				IOUtil.close(out);
 			}
 		}
-	}
-
-	private synchronized File createTempFile(URI uri) {
-		int port = uri.getPort();
-		if (port < 0) {
-			port = 80;
-		}
-		File ret = new File("/tmp/repo/" + uri.getHost() + "/" + port, uri.getPath() + ".mirrorit");
-		ret.getParentFile().mkdirs();
-		return ret;
 	}
 
 	private HttpClient getClient() {
