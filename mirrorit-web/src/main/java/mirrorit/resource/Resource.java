@@ -1,12 +1,10 @@
 package mirrorit.resource;
 
-import java.io.Closeable;
-
 import javax.servlet.ServletOutputStream;
 
 import com.googlecode.mycontainer.commons.file.ContentTypeUtil;
 
-public abstract class Resource implements Closeable {
+public class Resource {
 
 	private String host;
 	private Integer port;
@@ -39,16 +37,20 @@ public abstract class Resource implements Closeable {
 		this.path = path;
 	}
 
-	public abstract String getEncode();
+	public String getEncode() {
+		return null;
+	}
 
 	public String getMediaType() {
 		return ContentTypeUtil.getContentTypeByPath(path);
 	}
 
-	public abstract String getLength();
+	public String getLength() {
+		return null;
+	}
 
 	public void writeTo(ServletOutputStream outputStream) {
-		
+
 	}
 
 }

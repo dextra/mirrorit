@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import mirrorit.MirroritHttpCodeException;
+import mirrorit.resource.PermanentCacheFS;
 import mirrorit.resource.Resource;
 import mirrorit.resource.ResourceFS;
 
@@ -21,6 +22,7 @@ public class ProxyFilter implements Filter {
 
 	@Override
 	public void init(FilterConfig cfg) throws ServletException {
+		PermanentCacheFS.instance().startDownloads();
 	}
 
 	@Override
@@ -36,27 +38,23 @@ public class ProxyFilter implements Filter {
 		}
 
 		Resource resource = ResourceFS.instance().get(url);
-		try {
-			String mediaType = resource.getMediaType();
-			String encode = resource.getEncode();
-			String length = resource.getLength();
+		String mediaType = resource.getMediaType();
+		String encode = resource.getEncode();
+		String length = resource.getLength();
 
-			if (mediaType == null) {
-				throw new RuntimeException("mediaType is required: " + url);
-			}
-
-			resp.setContentType(mediaType);
-			if (encode != null) {
-				resp.setCharacterEncoding(encode);
-			}
-			if (length != null) {
-				resp.setHeader("Content-Length", length);
-			}
-
-			resource.writeTo(resp.getOutputStream());
-		} finally {
-			IOUtil.close(resource);
+		if (mediaType == null) {
+			throw new RuntimeException("mediaType is required: " + url);
 		}
+
+		resp.setContentType(mediaType);
+		if (encode != null) {
+			resp.setCharacterEncoding(encode);
+		}
+		if (length != null) {
+			resp.setHeader("Content-Length", length);
+		}
+
+		resource.writeTo(resp.getOutputStream());
 	}
 
 	private String getTargetUrl(HttpServletRequest req) {

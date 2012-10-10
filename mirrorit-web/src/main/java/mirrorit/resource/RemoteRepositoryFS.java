@@ -1,8 +1,6 @@
 package mirrorit.resource;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -12,8 +10,6 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 public class RemoteRepositoryFS {
 
 	public static final RemoteRepositoryFS ME = new RemoteRepositoryFS();
-
-	public final Map<String, ResourceDownload> downloads = new HashMap<String, ResourceDownload>();
 
 	public static RemoteRepositoryFS instance() {
 		return ME;
@@ -31,8 +27,8 @@ public class RemoteRepositoryFS {
 		System.out.println(uri.getPort());
 		System.out.println(uri.getPath());
 		System.out.println(uri.toString());
-		Resource resource = download(get);
-		return resource;
+		// Resource resource = download(get);
+		return null;
 
 		//
 		// try {
@@ -54,17 +50,6 @@ public class RemoteRepositoryFS {
 		// } catch (IOException e) {
 		// throw new RuntimeException(e);
 		// }
-	}
-
-	private Resource download(HttpGet get) {
-		String id = get.getURI().toString();
-		ResourceDownload download = downloads.get(id);
-		if (download == null) {
-			download = new ResourceDownload();
-			downloads.put(get.getURI().toString(), download);
-			download.start(get);
-		}
-		return download;
 	}
 
 	private HttpClient getClient() {
