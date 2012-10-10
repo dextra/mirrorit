@@ -12,6 +12,39 @@ import com.googlecode.mycontainer.commons.io.IOUtil;
 
 public class StorageTest {
 
+	public static class ReaderThread extends Thread {
+
+		private final StorageFile file;
+		private Exception exception;
+
+		public ReaderThread(StorageFile file) {
+			this.file = file;
+		}
+
+		@Override
+		public void run() {
+			try {
+				InputStream in = file.open();
+				try {
+					byte[] bytes = IOUtil.readAll(in);
+					String msg = new String(bytes);
+					if (!msg.equals("text1text2text3")) {
+						throw new RuntimeException("expected: text1text2text3, but was: " + msg);
+					}
+				} finally {
+					IOUtil.close(in);
+				}
+			} catch (Exception e) {
+				this.exception = e;
+			}
+		}
+
+		public Exception getException() {
+			return exception;
+		}
+
+	}
+
 	@Test
 	public void testStorage() throws Exception {
 		Storage storage = Storage.instance();
@@ -41,7 +74,7 @@ public class StorageTest {
 		assertTrue(file.exists());
 		assertFalse(file.isFinished());
 		assertTrue(file == storage.get("abc/text.txt"));
-		assertEquals(4, in1.available());
+		assertEquals(5, in1.available());
 		assertFileContent("text2", in1);
 		assertEquals(0, in1.available());
 		in2 = file.open();
@@ -51,7 +84,7 @@ public class StorageTest {
 		file.close();
 		assertTrue(file.exists());
 		assertTrue(file.isFinished());
-		assertTrue(file == storage.get("abc"));
+		assertTrue(file == storage.get("abc/text.txt"));
 		assertTrue(in1.read() < 0);
 		in1.close();
 		in2 = file.open();
@@ -66,6 +99,49 @@ public class StorageTest {
 		int read = in.read(buffer);
 		assertEquals(expected, new String(buffer));
 		assertEquals(expected.length(), read);
+	}
+
+	@Test
+	public void testStorageTreads() throws Exception {
+		Storage storage = Storage.instance();
+		storage.deleteAll();
+
+		StorageFile file = storage.get("abc/text.txt");
+		file.create();
+
+		ReaderThread t1 = new ReaderThread(file);
+		ReaderThread t2 = new ReaderThread(file);
+
+		t1.start();
+		t2.start();
+
+		Thread.sleep(100l);
+
+		file.append("text1".getBytes());
+
+		Thread.sleep(100l);
+
+		ReaderThread t3 = new ReaderThread(file);
+
+		t3.start();
+
+		file.append("text2".getBytes());
+		Thread.sleep(100l);
+		file.append("text3".getBytes());
+
+		t1.join();
+		t2.join();
+		t3.join();
+
+		assertException(t1.getException());
+		assertException(t2.getException());
+		assertException(t3.getException());
+	}
+
+	private void assertException(Exception exception) {
+		if (exception != null) {
+			throw new RuntimeException(exception);
+		}
 	}
 
 }

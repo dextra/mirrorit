@@ -29,6 +29,7 @@ public class Storage {
 			File base = getBase();
 			File file = new File(base, id);
 			ret = new StorageFile(file);
+			ret.recovery();
 			files.put(id, ret);
 		}
 		return ret;

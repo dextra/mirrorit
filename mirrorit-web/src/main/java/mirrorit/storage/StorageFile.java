@@ -1,7 +1,9 @@
 package mirrorit.storage;
 
+import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,21 +21,28 @@ public class StorageFile implements Closeable {
 		this.tmp = new File(file.getPath() + ".mirrorit");
 	}
 
-	public boolean exists() {
-		return file.exists();
+	public synchronized boolean exists() {
+		return file.exists() || tmp.exists();
 	}
 
-	public InputStream open() {
-		return null;
+	public synchronized InputStream open() {
+		try {
+			if (!isFinished()) {
+				return new BufferedInputStream(new FileInputStream(tmp));
+			}
+			return new BufferedInputStream(new FileInputStream(file));
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public synchronized void append(byte[] bytes) {
 		FileOutputStream out = null;
 		try {
-			if (!file.getParentFile().exists()) {
-				file.getParentFile().mkdirs();
+			if (!tmp.getParentFile().exists()) {
+				tmp.getParentFile().mkdirs();
 			}
-			out = new FileOutputStream(file, true);
+			out = new FileOutputStream(tmp, true);
 			out.write(bytes);
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
@@ -44,12 +53,12 @@ public class StorageFile implements Closeable {
 		}
 	}
 
-	public boolean isFinished() {
-		return false;
+	public synchronized boolean isFinished() {
+		return file.exists();
 	}
 
-	public void close() {
-
+	public synchronized void close() {
+		tmp.renameTo(file);
 	}
 
 	public synchronized void create() {
@@ -71,6 +80,12 @@ public class StorageFile implements Closeable {
 		}
 		if (tmp.exists() && !tmp.delete()) {
 			throw new RuntimeException("error on delete: " + file);
+		}
+	}
+
+	public synchronized void recovery() {
+		if (exists() && !isFinished()) {
+			delete();
 		}
 	}
 
