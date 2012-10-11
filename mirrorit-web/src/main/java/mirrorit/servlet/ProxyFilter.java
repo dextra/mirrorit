@@ -12,17 +12,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import mirrorit.MirroritHttpCodeException;
-import mirrorit.resource.PermanentCacheFS;
-import mirrorit.resource.Resource;
-import mirrorit.resource.ResourceFS;
-
-import com.googlecode.mycontainer.commons.io.IOUtil;
 
 public class ProxyFilter implements Filter {
 
 	@Override
 	public void init(FilterConfig cfg) throws ServletException {
-		PermanentCacheFS.instance().startDownloads();
 	}
 
 	@Override
@@ -37,24 +31,24 @@ public class ProxyFilter implements Filter {
 			return;
 		}
 
-		Resource resource = ResourceFS.instance().get(url);
-		String mediaType = resource.getMediaType();
-		String encode = resource.getEncode();
-		String length = resource.getLength();
-
-		if (mediaType == null) {
-			throw new RuntimeException("mediaType is required: " + url);
-		}
-
-		resp.setContentType(mediaType);
-		if (encode != null) {
-			resp.setCharacterEncoding(encode);
-		}
-		if (length != null) {
-			resp.setHeader("Content-Length", length);
-		}
-
-		resource.writeTo(resp.getOutputStream());
+		// Resource resource = ResourceFS.instance().get(url);
+		// String mediaType = resource.getMediaType();
+		// String encode = resource.getEncode();
+		// String length = resource.getLength();
+		//
+		// if (mediaType == null) {
+		// throw new RuntimeException("mediaType is required: " + url);
+		// }
+		//
+		// resp.setContentType(mediaType);
+		// if (encode != null) {
+		// resp.setCharacterEncoding(encode);
+		// }
+		// if (length != null) {
+		// resp.setHeader("Content-Length", length);
+		// }
+		//
+		// resource.writeTo(resp.getOutputStream());
 	}
 
 	private String getTargetUrl(HttpServletRequest req) {
@@ -69,7 +63,6 @@ public class ProxyFilter implements Filter {
 		if (query.trim().length() > 0) {
 			throw new RuntimeException("we will not proxy/cache url with query string: " + ret + "?" + query);
 		}
-		System.out.println("query: " + query);
 		if (ret.startsWith("http://localhost") || ret.startsWith("http://127.0.0.1")) {
 			return null;
 		}

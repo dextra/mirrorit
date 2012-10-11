@@ -1,5 +1,7 @@
 package mirrorit;
 
+import mirrorit.storage.Storage;
+
 import org.junit.After;
 import org.junit.Before;
 
@@ -16,6 +18,8 @@ public class AbstractTestCase {
 
 	@Before
 	public void setUp() throws Exception {
+		Storage.instance().deleteAll();
+
 		helper = new TestHelper();
 		helper.bootMycontainer();
 

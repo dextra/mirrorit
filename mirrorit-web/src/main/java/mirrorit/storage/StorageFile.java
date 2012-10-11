@@ -57,23 +57,6 @@ public class StorageFile implements Closeable {
 		}
 	}
 
-	public synchronized void append(byte[] bytes) {
-		FileOutputStream out = null;
-		try {
-			if (!tmp.getParentFile().exists()) {
-				tmp.getParentFile().mkdirs();
-			}
-			out = new FileOutputStream(tmp, true);
-			out.write(bytes);
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			IOUtil.close(out);
-		}
-	}
-
 	public synchronized boolean isFinished() {
 		return file.exists();
 	}
@@ -109,6 +92,36 @@ public class StorageFile implements Closeable {
 	public synchronized void recovery() {
 		if (exists() && !isFinished()) {
 			delete();
+		}
+	}
+
+	@Override
+	public String toString() {
+		return "" + file;
+	}
+
+	public File getFile() {
+		return file;
+	}
+
+	public synchronized void append(byte[] buffer) {
+		append(buffer, 0, buffer.length);
+	}
+
+	public synchronized void append(byte[] buffer, int o, int l) {
+		FileOutputStream out = null;
+		try {
+			if (!tmp.getParentFile().exists()) {
+				tmp.getParentFile().mkdirs();
+			}
+			out = new FileOutputStream(tmp, true);
+			out.write(buffer, o, l);
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			IOUtil.close(out);
 		}
 	}
 
