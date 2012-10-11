@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import mirrorit.config.Config;
+
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,7 @@ public class Storage {
 
 	private synchronized File getBase() {
 		if (base == null) {
-			File ret = new File("/tmp/repo");
+			File ret = new File(Config.instance().getStorage());
 			ret.mkdirs();
 			if (!ret.exists() || !ret.isDirectory()) {
 				throw new RuntimeException("base must be a directory: " + ret);

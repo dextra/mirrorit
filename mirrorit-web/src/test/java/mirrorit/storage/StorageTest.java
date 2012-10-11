@@ -6,6 +6,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 
+import mirrorit.config.Config;
+
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.googlecode.mycontainer.commons.io.IOUtil;
@@ -45,7 +49,13 @@ public class StorageTest {
 
 	}
 
+	@Before
+	public void setUp() {
+		Config.instance().setWaitForFileTimeout(1000l);
+	}
+
 	@Test
+	@Ignore
 	public void testStorage() throws Exception {
 		Storage storage = Storage.instance();
 		storage.deleteAll();
@@ -128,6 +138,8 @@ public class StorageTest {
 		file.append("text2".getBytes());
 		Thread.sleep(100l);
 		file.append("text3".getBytes());
+
+		file.close();
 
 		t1.join();
 		t2.join();

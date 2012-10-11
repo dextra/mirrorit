@@ -9,9 +9,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import mirrorit.config.Config;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.googlecode.mycontainer.commons.io.IOUtil;
 
 public class StorageFile implements Closeable {
+
+	private static final Logger LOG = LoggerFactory.getLogger(StorageFile.class);
 
 	private File file;
 	private File tmp;
@@ -27,11 +34,25 @@ public class StorageFile implements Closeable {
 
 	public synchronized InputStream open() {
 		try {
-			if (!isFinished()) {
-				return new BufferedInputStream(new FileInputStream(tmp));
-			}
+			waitForComplete();
 			return new BufferedInputStream(new FileInputStream(file));
 		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private synchronized void waitForComplete() {
+		try {
+			if (!isFinished()) {
+				LOG.info("Waiting for file: " + file);
+				wait(Config.instance().getWaitForFileTimeout());
+				boolean finished = isFinished();
+				LOG.info("Notify, finished: " + finished + " " + file);
+				if (!finished) {
+					throw new RuntimeException("timeout: " + file.getName());
+				}
+			}
+		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -58,7 +79,9 @@ public class StorageFile implements Closeable {
 	}
 
 	public synchronized void close() {
+		LOG.info("File close: " + file);
 		tmp.renameTo(file);
+		notifyAll();
 	}
 
 	public synchronized void create() {
